@@ -80,35 +80,28 @@ def encryption(grid, line_to_encrypt):
     """
 
     encrypted_line = ''
-    (new_row_1, new_col_1) = (0, 0)
-    (new_row_2, new_col_2) = (0, 0)
     (new_letter_1, new_letter_2) = ('', '')
 
-    # Here _1 and _2 refer to the first and second letters in a pair
+    # Here the _1 prefix refers to the first letter in a pair, and _2 the second
     for pair in line_to_encrypt:
-        if pair == 'XX':        # If 'XX' -> 'YY'
+        if pair == 'XX':            # If 'XX' -> 'YY'
             new_letter_1 = new_letter_2 = 'Y'
+            continue
 
-        else:
-            (row_1, col_1) = letter_coordinates(grid, pair[:1])   # Coodinates of letter_1
-            (row_2, col_2) = letter_coordinates(grid, pair[1:])   # and letter_2
+        row_1, col_1 = letter_coordinates(grid, pair[0])    # Coordinates of letter_1
+        row_2, col_2 = letter_coordinates(grid, pair[1])    # and letter_2
 
-            if col_1 == col_2:      # If columns match, move one row down
-                (new_row_1, new_row_2) = ((row_1+1) % 5, (row_2+1) % 5)     # Mod 5 returns to the first row as needed
-                (new_col_1, new_col_2) = (col_1, col_2)
+        if col_1 == col_2:              # For matching rows and columns
+            row_1 = (row_1 + 1) % 5     # increment by 1, mod 5 returns to the start as needed
+            row_2 = (row_2 + 2) % 5
+        elif row_1 == row_2:
+            col_1 = (col_1 + 1) % 5
+            col_2 = (col_2 + 1) % 5
+        else:                           # If neither match swap column coordinates
+            col_1, col_2 = col_2, col_1
 
-            else:                   # Row coordinates are the same for the last two cases
-                (new_row_1, new_row_2) = (row_1, row_2)
-
-                if row_1 == row_2:  # If rows match, move one column to the right
-                    (new_col_1, new_col_2) = ((col_1+1) % 5, (col_2+1) % 5)     # Mod 5 again
-
-                else:               # If neither match, swap their column coordinates
-                    (new_col_1, new_col_2) = (col_2, col_1)
-
-            new_letter_1 = grid[new_row_1][new_col_1]    # Find letters in the grid
-            new_letter_2 = grid[new_row_2][new_col_2]
-
+        new_letter_1 = grid[row_1][col_1]   # Find letters in the grid
+        new_letter_2 = grid[row_2][col_2]
         encrypted_line += new_letter_1 + new_letter_2
 
     return encrypted_line
