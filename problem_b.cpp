@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
 
 
 using namespace std;
@@ -23,27 +24,33 @@ vector<string> playfairCipher(string keyPhrase)
 
     keyPhrase += "ABCDEFGHIKLMNOPQRSTUVWXYZ";
     string cipher;
-
-    for (i = 0; i < strlen(keyPhrase); i++)
-    {
-        if keyPhrase[i] is 'J'
-            keyPhrase[i] = 'I';
-        if keyPhrase[i] not in cipher   // Keep first occurence of a letter
-            cipher += letter;
-    }
-
     vector<string> cipherGrid;
+    string gridRow;
+
+    for (int i = 0; i < sizeof(keyPhrase); i++)
+    {
+        if (keyPhrase[i] == 'J')
+            keyPhrase[i] = 'I';
+
+        size_t notInCipher = cipher.find(keyPhrase[i]);
+
+        if (notInCipher = npos::string)     // Keep first occurence of a letter
+            cipher += keyPhrase[i];
+    }
 
     for (int j = 0; j < 5; j++)      // Create grid
     {
-        cipherGrid.push_back(cipher[j:j+5]);
+        for (int k = 0; k < 5; k++)
+            gridRow += cipher[j];
+
+        cipherGrid.push_back(gridRow);
     }
 
     return cipherGrid;
 }
 
 
-vector< pair<string, string> > prepareMessage(string line)
+vector<string> prepareMessage(string line)
 {
     /*
      * Here, we prepare the message for encryption in 3 steps:
@@ -52,20 +59,21 @@ vector< pair<string, string> > prepareMessage(string line)
      * - Split the letters into pairs
      */
 
-    vector< pair<int, int> > lineToEncrypt;
+    vector<string> lineToEncrypt;
 
-    for (int i = 0; i < strlen(line); i += 2)   // Iterate over pairs
+    for (int i = 0; i < sizeof(line); i += 2)   // Iterate over pairs
     {
         if (line[i] == line[i+1])       // Insert 'X' in between if pair is identical
             line.insert(i+1, 1, 'X');
     }
 
-    if (strlen(line) % 2 == 1)          // If line length is odd, append an 'X'
+    if (sizeof(line) % 2 == 1)          // If line length is odd, append an 'X'
         line += "X";
 
-    for (int j; j < strlen(line) / 2; j++)
+    for (int j; j < sizeof(line); j += 2)
     {
-        lineToEncrypt.push_back(line[2*j:2*j+1])     // Split into pairs of letters
+        lineToEncrypt.push_back(line[2*j]);   // Split into pairs of letters
+        lineToEncrypt.push_back(line[2*j+1]);
     }
 
     return lineToEncrypt;
@@ -84,7 +92,7 @@ namespace getCoords
 
         for (int row = 0; row < 5; row++)           // Search the row containing the letter
         {
-            if (letter is 'J')
+            if (letter == 'J')
                 letter = 'I';
 
             size_t col = grid[row].find(letter);
@@ -102,7 +110,7 @@ namespace getCoords
 };
 
 
-string encryption(vector<string> cipherGrid, pair<string, string> lineToEncrypt)
+string encryption(vector<string> cipherGrid, vector<string> lineToEncrypt)
 {
     /*
      * This function takes cipherGrid and a lineToEncrypt as inputs and encrypts
@@ -122,37 +130,37 @@ string encryption(vector<string> cipherGrid, pair<string, string> lineToEncrypt)
     pair<int, int> coordsLet2;
     pair<string, string> encryptedPair;
 
-    for (int i = 0; i < strlen(lineToEncrypt); i++)
+    for (int i = 0; i < sizeof(lineToEncrypt); i++)
     {
         coordsLet1 = getCoords::letterCoordinates(cipher, lineToEncrypt[i][0]);     // Get coordinates for the letter pair
         coordsLet2 = getCoords::letterCoordinates(cipher, lineToEncrypt[i][1]);
 
-        if (lineToEncrypt[i] == pair<'X', 'X'>)     // ???     If 'XX' -> 'YY'
+        if (lineToEncrypt[i][0] == lineToEncrypt[i][1])  // If 'XX' -> 'YY'
         {
             coordsLet1 = getCoords::letterCoordinates(cipher, 'Y');
-            coordsLet2 = getCoords::lettercoordinates(cipher, 'Y');
+            coordsLet2 = coordsLet1;
         }
 
-        else if (coordsLet1.second == coordsLet2.second)    // Columns match
-        {
-            coordsLet1.first = (coordsLet1.first + 1) % 5;
-            coordsLet2.first = (coordsLet2.first + 1) % 5;
-        }
-
-        else if (coordsLet1.first == coordsLet2.first)      // Rows match
+        else if (coordsLet1.first == coordsLet2.first)          // Rows match, increment column by 1 or return to the start
         {
             coordsLet1.second = (coordsLet1.second + 1) % 5;
             coordsLet2.second = (coordsLet2.second + 1) % 5;
         }
 
-        else                                                // Neither match
+        else if (coordsLet1.second == coordsLet2.second)        // Columns match, increment row by 1 or return to the start
+        {
+            coordsLet1.first = (coordsLet1.first + 1) % 5;
+            coordsLet2.first = (coordsLet2.first + 1) % 5;
+        }
+
+        else                                                    // Neither match, swap columns coordinates
         {
             int tmp = coordsLet1.second;
             coordsLet1.second = coordsLet2.second;
             coordsLet2.second = tmp;
         }
 
-        encryptedPair.first = cipherGrid[coordsLet1.first].find(coordLet1.second);
+        encryptedPair.first = cipherGrid[coordsLet1.first].find(coordsLet1.second);
         encryptedPair.second = cipherGrid[coordsLet2.first].find(coordsLet2.second);
 
         encryptedLine += encryptedPair.first + encryptedPair.second;
@@ -169,11 +177,11 @@ int main()
      * Calls prepareMessage and encryption functions once per line of text
      */
 
-    int numLines;           // Used in the first while loop
+    int numLines;           // Assigned in the do-while loop
     string keyPhrase;
     string cipher;
 
-    string line;            // Used in the nested while loop
+    string line;            // Assigned in the nested while loop
     vector<string> lineToEncrypt;
     string encryptedLine;
 
@@ -184,7 +192,7 @@ int main()
 
         cipher = playfairCipher(keyPhrase);
 
-        while
+        do
         {
             cin >> line;
 
@@ -194,10 +202,10 @@ int main()
             cout << encryptedLine << "\n" << endl;
         }
 
-        cout << "\n" << endl;
+        while (sizeof(line) > 0);
 
+        cout << "\n" << endl;
     }
 
-    while numLines:
-
+    while (numLines);
 }
