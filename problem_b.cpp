@@ -22,10 +22,11 @@ vector<string> playfairCipher(string keyPhrase)
      * - Splits the phrase into a 5x5 grid
      */
 
-    keyPhrase += "ABCDEFGHIKLMNOPQRSTUVWXYZ";
     string cipher;
     vector<string> cipherGrid;
     string gridRow;
+
+    keyPhrase += "ABCDEFGHIKLMNOPQRSTUVWXYZ";
 
     for (int i = 0; i < sizeof(keyPhrase); i++)
     {
@@ -59,6 +60,7 @@ vector<string> prepareMessage(string line)
      * - Split the letters into pairs
      */
 
+    string pairToEncrypt;
     vector<string> lineToEncrypt;
 
     for (int i = 0; i < sizeof(line); i += 2)   // Iterate over pairs
@@ -72,8 +74,8 @@ vector<string> prepareMessage(string line)
 
     for (int j; j < sizeof(line); j += 2)
     {
-        lineToEncrypt.push_back(line[2*j]);   // Split into pairs of letters
-        lineToEncrypt.push_back(line[2*j+1]);
+        pairToEncrypt = line[2*j] + line[2*j+1];   // Split into pairs of letters
+        lineToEncrypt.push_back(pairToEncrypt);
     }
 
     return lineToEncrypt;
@@ -132,12 +134,12 @@ string encryption(vector<string> cipherGrid, vector<string> lineToEncrypt)
 
     for (int i = 0; i < sizeof(lineToEncrypt); i++)
     {
-        coordsLet1 = getCoords::letterCoordinates(cipher, lineToEncrypt[i][0]);     // Get coordinates for the letter pair
-        coordsLet2 = getCoords::letterCoordinates(cipher, lineToEncrypt[i][1]);
+        coordsLet1 = getCoords::letterCoordinates(cipherGrid, lineToEncrypt[i][0]);     // Get coordinates for the letter pair
+        coordsLet2 = getCoords::letterCoordinates(cipherGrid, lineToEncrypt[i][1]);
 
         if (lineToEncrypt[i][0] == lineToEncrypt[i][1])  // If 'XX' -> 'YY'
         {
-            coordsLet1 = getCoords::letterCoordinates(cipher, 'Y');
+            coordsLet1 = getCoords::letterCoordinates(cipherGrid, 'Y');
             coordsLet2 = coordsLet1;
         }
 
@@ -190,19 +192,20 @@ int main()
         cin >> numLines;
         cin >> keyPhrase;
 
+        vector<string> playfairCipher(string);
         cipher = playfairCipher(keyPhrase);
 
-        do
+        while (numLines)
         {
             cin >> line;
 
+            string encryption(string, vector<string>);
             lineToEncrypt = prepareMessage(line);
+
             encryptedLine = encryption(cipher, lineToEncrypt);
 
             cout << encryptedLine << "\n" << endl;
         }
-
-        while (sizeof(line) > 0);
 
         cout << "\n" << endl;
     }
