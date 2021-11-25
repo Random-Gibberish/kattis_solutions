@@ -11,7 +11,7 @@ def playfair_cipher(key_phrase):
     """
         This function prepares the grid used to encode the letter in 3 steps:
         - Appends the alphabet (except 'J') to the key_phrase
-        - Keeps only the first occurence of a letter
+        - Keeps only the first occurrence of a letter
         - Splits the phrase into a 5x5 grid
     """
 
@@ -21,7 +21,7 @@ def playfair_cipher(key_phrase):
     for letter in key_phrase:
         if letter == 'J':
             letter = 'I'
-        if letter not in cipher:    # Keep first occurence of a letter
+        if letter not in cipher:    # Keep first occurrence of a letter
             cipher += letter
 
     cipher_grid = [cipher[i:i+5] for i in range(0, len(cipher), 5)]     # Make grid
@@ -51,7 +51,7 @@ def prepare_message(line):
 
 def letter_coordinates(grid, letter):
     """
-        Finds a letter in the ciper_grid() and returns its coordinates
+        Finds a letter in the cipher_grid() and returns its coordinates
     """
 
     for row in range(5):
@@ -70,28 +70,25 @@ def encryption(grid, line_to_encrypt):
         This function takes cipher_grid and a line of text as input and encrypts
         letters two at a time as follows:
         - If 'XX' encrypt as 'YY'
-        - Else call letter_coordinates() on each letter in the pair
-            - If both letters are on the same column, move 1 down or wrap around to
-              the start of the column
-            - If both letters are on the same row, move 1 to the right or wrap around
-              to the start of the row
-            - If the letters are neither in the same row nor the same column, swap
-              their column indices
+        - If both letters are on the same column, move 1 down or wrap around to
+          the start of the column
+        - If both letters are on the same row, move 1 to the right or wrap around
+          to the start of the row
+        - If the letters are neither in the same row nor the same column, swap
+          their column indices
     """
 
     encrypted_line = ''
-    (new_letter_1, new_letter_2) = ('', '')
 
     # Here the _1 prefix refers to the first letter in a pair, and _2 the second
     for pair in line_to_encrypt:
-        if pair == 'XX':            # If 'XX' -> 'YY'
-            new_letter_1 = new_letter_2 = 'Y'
-            continue
-
         row_1, col_1 = letter_coordinates(grid, pair[0])    # Coordinates of letter_1
         row_2, col_2 = letter_coordinates(grid, pair[1])    # and letter_2
 
-        if col_1 == col_2:              # For matching rows and columns
+        if pair == 'XX':                # If 'XX' -> 'YY'
+            row_1, col_1 = letter_coordinates(grid, 'Y')
+            row_2, col_2 = row_1, col_1
+        elif col_1 == col_2:            # For matching rows and columns
             row_1 = (row_1 + 1) % 5     # increment by 1, mod 5 returns to the start as needed
             row_2 = (row_2 + 2) % 5
         elif row_1 == row_2:
@@ -100,9 +97,7 @@ def encryption(grid, line_to_encrypt):
         else:                           # If neither match swap column coordinates
             col_1, col_2 = col_2, col_1
 
-        new_letter_1 = grid[row_1][col_1]   # Find letters in the grid
-        new_letter_2 = grid[row_2][col_2]
-        encrypted_line += new_letter_1 + new_letter_2
+        encrypted_line += grid[row_1][col_1] + grid[row_2][col_2]   # Find and append letters
 
     return encrypted_line
 

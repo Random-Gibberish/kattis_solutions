@@ -5,6 +5,7 @@
  */
 
 
+#include <boost/algorithm/string.hpp>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -33,13 +34,11 @@ vector<string> playfairCipher(string keyPhrase)
         if (keyPhrase[i] == 'J')
             keyPhrase[i] = 'I';
 
-        size_t notInCipher = cipher.find(keyPhrase[i]);
-
-        if (notInCipher = npos::string)     // Keep first occurence of a letter
+        if (find(cipher.begin(), cipher.end(), keyPhrase[i]) != cipher.end())   // Keep first occurence of a letter
             cipher += keyPhrase[i];
     }
 
-    for (int j = 0; j < 5; j++)      // Create grid
+    for (int j = 0; j < 5; j++)     // Create grid
     {
         for (int k = 0; k < 5; k++)
             gridRow += cipher[j];
@@ -74,7 +73,7 @@ vector<string> prepareMessage(string line)
 
     for (int j; j < sizeof(line); j += 2)
     {
-        pairToEncrypt = line[2*j] + line[2*j+1];   // Split into pairs of letters
+        pairToEncrypt = line[2*j] + line[2*j+1];    // Split into pairs of letters
         lineToEncrypt.push_back(pairToEncrypt);
     }
 
@@ -97,12 +96,10 @@ namespace getCoords
             if (letter == 'J')
                 letter = 'I';
 
-            size_t col = grid[row].find(letter);
-
-            if (col != string::npos)                // If letter is found return the coordinates
+            if (find(grid[row].begin(), grid[row].end(), letter) != grid[row].end())   // If letter is found return the coordinates
             {
                 letCoords.first = row;
-                letCoords.second = col;
+                letCoords.second = grid[row].find(letter);
                 break;
             }
         }
@@ -137,25 +134,25 @@ string encryption(vector<string> cipherGrid, vector<string> lineToEncrypt)
         coordsLet1 = getCoords::letterCoordinates(cipherGrid, lineToEncrypt[i][0]);     // Get coordinates for the letter pair
         coordsLet2 = getCoords::letterCoordinates(cipherGrid, lineToEncrypt[i][1]);
 
-        if (lineToEncrypt[i][0] == lineToEncrypt[i][1])  // If 'XX' -> 'YY'
+        if (lineToEncrypt[i][0] == lineToEncrypt[i][1])     // If 'XX' -> 'YY'
         {
             coordsLet1 = getCoords::letterCoordinates(cipherGrid, 'Y');
             coordsLet2 = coordsLet1;
         }
 
-        else if (coordsLet1.first == coordsLet2.first)          // Rows match, increment column by 1 or return to the start
+        else if (coordsLet1.first == coordsLet2.first)      // Rows match, increment column by 1 or return to the start
         {
             coordsLet1.second = (coordsLet1.second + 1) % 5;
             coordsLet2.second = (coordsLet2.second + 1) % 5;
         }
 
-        else if (coordsLet1.second == coordsLet2.second)        // Columns match, increment row by 1 or return to the start
+        else if (coordsLet1.second == coordsLet2.second)    // Columns match, increment row by 1 or return to the start
         {
             coordsLet1.first = (coordsLet1.first + 1) % 5;
             coordsLet2.first = (coordsLet2.first + 1) % 5;
         }
 
-        else                                                    // Neither match, swap columns coordinates
+        else                                                // Neither match, swap columns coordinates
         {
             int tmp = coordsLet1.second;
             coordsLet1.second = coordsLet2.second;
@@ -192,6 +189,9 @@ int main()
         cin >> numLines;
         cin >> keyPhrase;
 
+        keyPhrase.erase(remove(keyPhrase.begin(), keyPhrase.end(), ' '), keyPhrase.end());
+        boost::to_upper(keyPhrase);
+
         vector<string> playfairCipher(string);
         cipher = playfairCipher(keyPhrase);
 
@@ -199,9 +199,12 @@ int main()
         {
             cin >> line;
 
-            string encryption(string, vector<string>);
+            line.erase(remove(line.begin(), line.end(), ' '), line.end());
+            boost::to_upper(line);
+
             lineToEncrypt = prepareMessage(line);
 
+            string encryption(string, vector<string>);
             encryptedLine = encryption(cipher, lineToEncrypt);
 
             cout << encryptedLine << "\n" << endl;
